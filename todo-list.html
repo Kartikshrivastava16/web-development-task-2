@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do List – Task 4</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f7f4 0%, #f0f4ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .app {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,128,128,0.13);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    h1 { color: #006666; font-size: 1.7rem; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 0.88rem; margin-bottom: 24px; }
+
+    /* Input row */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #d0e8e8;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-row input:focus { border-color: #008080; }
+
+    .btn-add {
+      padding: 10px 18px;
+      background: #008080;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-add:hover { background: #006666; }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 2px solid #d0e8e8;
+      background: #fff;
+      color: #555;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: #008080;
+      color: #fff;
+      border-color: #008080;
+    }
+
+    /* Stats */
+    .stats {
+      font-size: 0.82rem;
+      color: #888;
+      margin-bottom: 14px;
+    }
+
+    .stats span { color: #008080; font-weight: 700; }
+
+    /* Task list */
+    #taskList { list-style: none; }
+
+    #taskList li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      background: #f9fefe;
+      border-radius: 9px;
+      margin-bottom: 8px;
+      border: 1.5px solid #e8f5f5;
+      animation: slideIn 0.2s ease;
+      transition: background 0.2s;
+    }
+
+    #taskList li:hover { background: #f0fafa; }
+
+    #taskList li.done { opacity: 0.55; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .cb {
+      width: 18px;
+      height: 18px;
+      accent-color: #008080;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #333;
+      word-break: break-word;
+    }
+
+    li.done .task-text { text-decoration: line-through; color: #aaa; }
+
+    .priority-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .p-high   { background: #fdecea; color: #c62828; }
+    .p-medium { background: #fff8e1; color: #f57f17; }
+    .p-low    { background: #e8f5e9; color: #2e7d32; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-del:hover { color: #e53935; background: #fdecea; }
+
+    .empty-state {
+      text-align: center;
+      color: #bbb;
+      padding: 30px 0;
+      font-size: 0.95rem;
+    }
+
+    /* Priority selector */
+    .input-row select {
+      padding: 10px 8px;
+      border: 2px solid #d0e8e8;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      color: #555;
+      background: #fff;
+    }
+
+    .clear-btn {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      padding: 9px;
+      background: none;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      color: #aaa;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .clear-btn:hover { border-color: #e53935; color: #e53935; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>📝 To-Do List</h1>
+  <p class="subtitle">Add tasks, set priority, mark done — all with DOM manipulation.</p>
+
+  <div class="input-row">
+    <input type="text" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key==='Enter') addTask()"/>
+    <select id="priority">
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select>
+    <button class="btn-add" onclick="addTask()">+ Add</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('active', this)">Active</button>
+    <button class="filter-btn" onclick="setFilter('done', this)">Completed</button>
+  </div>
+
+  <div class="stats">
+    <span id="doneCount">0</span> done · <span id="leftCount">0</span> remaining
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <button class="clear-btn" onclick="clearCompleted()">🗑 Clear completed</button>
+</div>
+
+<script>
+  let tasks = [];
+  let currentFilter = 'all';
+
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const priority = document.getElementById('priority').value;
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+
+    tasks.push({ id: Date.now(), text, priority, done: false });
+    input.value = '';
+    input.focus();
+    render();
+  }
+
+  function toggleDone(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    render();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+  }
+
+  function clearCompleted() {
+    tasks = tasks.filter(t => !t.done);
+    render();
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('taskList');
+    const filtered = tasks.filter(t => {
+      if (currentFilter === 'active') return !t.done;
+      if (currentFilter === 'done')   return t.done;
+      return true;
+    });
+
+    list.innerHTML = '';
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty-state">No tasks here yet 🌿</div>';
+    } else {
+      filtered.forEach(t => {
+        const li = document.createElement('li');
+        if (t.done) li.classList.add('done');
+
+        const labels = { high: 'High', medium: 'Medium', low: 'Low' };
+        const classes = { high: 'p-high', medium: 'p-medium', low: 'p-low' };
+
+        li.innerHTML = `
+          <input class="cb" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleDone(${t.id})"/>
+          <span class="task-text">${escHtml(t.text)}</span>
+          <span class="priority-badge ${classes[t.priority]}">${labels[t.priority]}</span>
+          <button class="btn-del" onclick="deleteTask(${t.id})" title="Delete">✕</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('doneCount').textContent = tasks.filter(t => t.done).length;
+    document.getElementById('leftCount').textContent  = tasks.filter(t => !t.done).length;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Seed a few example tasks
+  ['Design the homepage layout', 'Write form validation JS', 'Build responsive navbar'].forEach((text, i) => {
+    tasks.push({ id: i + 1, text, priority: ['high','medium','low'][i], done: i === 0 });
+  });
+  render();
+</script>
+</body>
+</html>
